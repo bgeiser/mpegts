@@ -31,6 +31,7 @@ public:
         bool mPmtIsValid = false;
         int mPcrId;
         int mProgNo;
+        SimpleBuffer mPmtBuf;
     } pmtInfoT;
 
     // stream, pid
