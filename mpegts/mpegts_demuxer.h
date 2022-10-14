@@ -26,22 +26,25 @@ public:
     std::function<void(EsFrame *pEs)> esOutCallback = nullptr;
     std::function<void(uint64_t lPcr)> pcrOutCallback = nullptr;
 
+    typedef struct {
+        PMTHeader mPmtHeader;
+        bool mPmtIsValid = false;
+        int mPcrId;
+        int mProgNo;
+    } pmtInfoT;
+
     // stream, pid
-    std::map<uint8_t, int> mStreamPidMap;
-    int mPmtId;
+    //    std::map<uint8_t, int> mStreamPidMap;
+
+    // pmtPid, pmtInfo
+    std::map<int, pmtInfoT> mPmtMap;
 
     // PAT
     PATHeader mPatHeader;
     bool mPatIsValid = false;
 
-    // PMT
-    PMTHeader mPmtHeader;
-    bool mPmtIsValid = false;
-
 private:
     // pid, Elementary data frame
     std::map<int, std::shared_ptr<EsFrame>> mEsFrames;
-    int mPcrId;
     SimpleBuffer mRestData;
 };
-

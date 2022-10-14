@@ -62,7 +62,7 @@ void SimpleBuffer::write8Bytes(int64_t val)
 void SimpleBuffer::append(const uint8_t* bytes, int size)
 {
     if (!bytes || size <= 0) {
-#ifdef DEBUG
+#ifdef TSDEBUG
         std::cout << " append error " << std::endl;
 #endif
         return;
@@ -74,7 +74,7 @@ void SimpleBuffer::append(const uint8_t* bytes, int size)
 void SimpleBuffer::prepend(const uint8_t* bytes, int size)
 {
     if (!bytes || size <= 0) {
-#ifdef DEBUG
+#ifdef TSDEBUG
         std::cout << " prepend error " << std::endl;
 #endif
         return;
@@ -204,14 +204,14 @@ void SimpleBuffer::clear()
 void SimpleBuffer::setData(int pos, const uint8_t* data, int len)
 {
     if (!data) {
-#ifdef DEBUG
+#ifdef TSDEBUG
         std::cout << " setData error data ptr == nullpts " << std::endl;
 #endif
         return;
     }
 
     if (pos + len > size()) {
-#ifdef DEBUG
+#ifdef TSDEBUG
         std::cout << " setData error data out of bounds " << std::endl;
 #endif
         return;
