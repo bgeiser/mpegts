@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <stdint.h>
-#include <iostream>
 
 // only support little endian
 class SimpleBuffer

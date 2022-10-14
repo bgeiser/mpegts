@@ -1,6 +1,7 @@
 #include "simple_buffer.h"
 #include <assert.h>
 #include <iterator>
+#include <iostream>
 
 SimpleBuffer::SimpleBuffer()
     : mPos(0)
