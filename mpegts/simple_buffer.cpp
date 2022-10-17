@@ -85,7 +85,7 @@ void SimpleBuffer::prepend(const uint8_t* bytes, int size)
 
 int8_t SimpleBuffer::read1Byte()
 {
-    assert(require(1));
+    require(1);
 
     int8_t val = mData.at(0 + mPos);
     mPos++;
@@ -95,7 +95,7 @@ int8_t SimpleBuffer::read1Byte()
 
 int16_t SimpleBuffer::read2Bytes()
 {
-    assert(require(2));
+    require(2);
 
     int16_t val = 0;
     char *p = (char *)&val;
@@ -110,7 +110,7 @@ int16_t SimpleBuffer::read2Bytes()
 
 int32_t SimpleBuffer::read3Bytes()
 {
-    assert(require(3));
+    require(3);
 
     int32_t val = 0;
     char *p = (char *)&val;
@@ -125,7 +125,7 @@ int32_t SimpleBuffer::read3Bytes()
 
 int32_t SimpleBuffer::read4Bytes()
 {
-    assert(require(4));
+    require(4);
 
     int32_t val = 0;
     char *p = (char *)&val;
@@ -140,7 +140,7 @@ int32_t SimpleBuffer::read4Bytes()
 
 int64_t SimpleBuffer::read8Bytes()
 {
-    assert(require(8));
+    require(8);
 
     int64_t val = 0;
     char *p = (char *)&val;
@@ -155,7 +155,7 @@ int64_t SimpleBuffer::read8Bytes()
 
 std::string SimpleBuffer::readString(int len)
 {
-    assert(require(len));
+    require(len);
 
     std::string val(*(char*)&mData[0] + mPos, len);
     mPos += len;
@@ -168,11 +168,12 @@ void SimpleBuffer::skip(int size)
     mPos += size;
 }
 
-bool SimpleBuffer::require(int required_size)
+void SimpleBuffer::require(int required_size)
 {
     assert(required_size >= 0);
 
-    return required_size <= mData.size() - mPos;
+    if((unsigned int)required_size > mData.size() - mPos)
+        throw std::length_error("error parsing ts: required " + std::to_string(required_size) + " bytes where " + std::to_string(mData.size() - mPos) + " are available");
 }
 
 bool SimpleBuffer::empty()

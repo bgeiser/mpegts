@@ -30,7 +30,6 @@ public:
     std::string readString(int len);
 
     void skip(int size);
-    bool require(int required_size);
     bool empty();
     int size();
     int pos();
@@ -39,6 +38,7 @@ public:
     void setData(int pos, const uint8_t* data, int len);
 
 private:
+    void require(int required_size);
     std::vector<uint8_t> mData;
     int mPos;
 };
