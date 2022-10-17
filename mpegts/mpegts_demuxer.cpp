@@ -29,8 +29,13 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
             if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadOnly ||
                 lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
                 if (lTsHeader.mPayloadUnitStartIndicator == 0x01)
-                    uint8_t lPointField = rIn.read1Byte();
-                mPatBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                    {
+                        uint8_t lPointField = rIn.read1Byte();
+                        mPatBuf.clear();
+                        mPatBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                    }
+                else if(mPatBuf.size())
+                    mPatBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
                 if (mPatBuf.size() >= mPatHeader.getSectionLength(mPatBuf)) {
                     mPatHeader.decode(mPatBuf);
                     auto start = rIn.pos();
@@ -63,8 +68,13 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                 if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadOnly ||
                     lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
                     if (lTsHeader.mPayloadUnitStartIndicator == 0x01)
-                        uint8_t lPointField = rIn.read1Byte();
-                    pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                        {
+                            uint8_t lPointField = rIn.read1Byte();
+                            pmtInfo.mPmtBuf.clear();
+                            pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                        }
+                    else if(pmtInfo.mPmtBuf.size())
+                        pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
                     if (pmtInfo.mPmtBuf.size() >= pmtInfo.mPmtHeader.getSectionLength(pmtInfo.mPmtBuf)) {
                         pmtInfo.mPmtHeader.decode(pmtInfo.mPmtBuf);
                         pmtInfo.mPmtBuf.clear();
