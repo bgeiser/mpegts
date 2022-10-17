@@ -32,6 +32,7 @@ public:
         int mPcrId;
         int mProgNo;
         SimpleBuffer mPmtBuf;
+        int mCurrentSection = 0;
     } pmtInfoT;
 
     // stream, pid

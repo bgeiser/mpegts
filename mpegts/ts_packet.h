@@ -118,6 +118,8 @@ public:
 
     void decode(SimpleBuffer &rSb);
 
+    uint16_t getSectionLength(SimpleBuffer &rSb);
+
     uint16_t size();
 
     void print();

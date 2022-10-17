@@ -59,40 +59,36 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                     lAdaptionField.decode(rIn);
                     rIn.skip(lAdaptionField.mAdaptationFieldLength > 0 ? (lAdaptionField.mAdaptationFieldLength - 1) : 0);
                 }
+                bool sectionComplete = false;
                 if (lTsHeader.mPayloadUnitStartIndicator == 0x01) {
                     uint8_t lPointField = rIn.read1Byte();
-                    if(!pmtInfo.mPmtBuf.size())
-                        {
-                            //                            std::cout<<std::to_string(lTsHeader.mPid)<< " start with  "<< std::to_string(rIn.size() - rIn.pos())<<std::endl;
-                            pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
-                        }
-                    else
-                        {
-                            //                            std::cout<<std::to_string(lTsHeader.mPid)<< " valid"<<std::endl;
-                            pmtInfo.mPmtIsValid = true;
-                        }
+                    pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                } else if(pmtInfo.mPmtBuf.size()) {
+                    pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                    if(pmtInfo.mPmtBuf.size() >= pmtInfo.mPmtHeader.getSectionLength(pmtInfo.mPmtBuf))
+                        sectionComplete = true;
                 }
-                else
-                    if(pmtInfo.mPmtBuf.size())
+                if (sectionComplete) {
+                    pmtInfo.mPmtHeader.decode(pmtInfo.mPmtBuf);
+                    pmtInfo.mPmtBuf.clear();
+                    pmtInfo.mPcrId = pmtInfo.mPmtHeader.mPcrPid;
+                    if(pmtInfo.mPmtHeader.mSectionNumber == pmtInfo.mCurrentSection)
                         {
-                            //                            std::cout<<std::to_string(lTsHeader.mPid)<< " append  "<< std::to_string(rIn.size() - rIn.pos())<<std::endl;
-                            pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                            for (size_t lI = 0; lI < pmtInfo.mPmtHeader.mInfos.size(); lI++) {
+                                auto &info = pmtInfo.mPmtHeader.mInfos[lI];
+                                if(mEsFrames.find(info->mElementaryPid) == mEsFrames.end()) {
+                                    mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType));
+                                    //                                mStreamPidMap[info->mStreamType] = info->mElementaryPid;
+                                }
+                            }
+                            pmtInfo.mCurrentSection++;
                         }
-            if (pmtInfo.mPmtIsValid) {
-                pmtInfo.mPmtHeader.decode(pmtInfo.mPmtBuf);
-                pmtInfo.mPcrId = pmtInfo.mPmtHeader.mPcrPid;
-                for (size_t lI = 0; lI < pmtInfo.mPmtHeader.mInfos.size(); lI++) {
-                    auto &info = pmtInfo.mPmtHeader.mInfos[lI];
-                    if(mEsFrames.find(info->mElementaryPid) == mEsFrames.end())
-                        {
-                            mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType));
-                            //                                mStreamPidMap[info->mStreamType] = info->mElementaryPid;
-                        }
-                }
-#ifdef DEBUG
-                pmtInfo.mPmtHeader.print();
+                    if(pmtInfo.mCurrentSection > pmtInfo.mPmtHeader.mLastSectionNumber)
+                        pmtInfo.mPmtIsValid = true;
+#ifdef TSDEBUG
+                    pmtInfo.mPmtHeader.print();
 #endif
-            }
+                }
             }
         }
 

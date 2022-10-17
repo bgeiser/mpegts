@@ -235,6 +235,11 @@ void PMTHeader::encode(SimpleBuffer &rSb) {
     }
 }
 
+uint16_t PMTHeader::getSectionLength(SimpleBuffer &rSb) {
+    uint8_t *data = rSb.data() + rSb.pos() + 1;
+    return ((uint16_t)(data[0] & 0xf) << 8) | (uint16_t)data[1];
+}
+
 void PMTHeader::decode(SimpleBuffer &rSb) {
     mTableId = rSb.read1Byte();
 
