@@ -177,7 +177,7 @@ bool SimpleBuffer::require(int required_size)
 
 bool SimpleBuffer::empty()
 {
-    return mPos >= mData.size();
+    return (unsigned int)mPos >= mData.size();
 }
 
 int SimpleBuffer::size()

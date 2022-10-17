@@ -4,12 +4,12 @@
 #include <iostream>
 
 EsFrame::EsFrame()
-        : mCompleted(false), mPid(0), mExpectedPesPacketLength(0) {
+    : mPid(0), mExpectedPesPacketLength(0),mCompleted(false) {
     mData.reset(new SimpleBuffer);
 }
 
 EsFrame::EsFrame(uint8_t lSt)
-        : mStreamType(lSt), mCompleted(false), mBroken(false), mPid(0), mExpectedPesPacketLength(0), mExpectedPayloadLength(0) {
+        : mStreamType(lSt), mPid(0), mExpectedPesPacketLength(0), mExpectedPayloadLength(0), mCompleted(false), mBroken(false) {
     mData.reset(new SimpleBuffer);
 }
 
@@ -27,8 +27,7 @@ void EsFrame::reset() {
 }
 
 TsHeader::TsHeader()
-        : mSyncByte(0x47), mTransportErrorIndicator(0), mPayloadUnitStartIndicator(0), mTransportPriority(0), mPid(0),
-          mTransportScramblingControl(0), mAdaptationFieldControl(0), mContinuityCounter(0) {
+        : mSyncByte(0x47), mTransportErrorIndicator(0), mPayloadUnitStartIndicator(0), mTransportPriority(0), mPid(0), mTransportScramblingControl(0), mAdaptationFieldControl(0), mContinuityCounter(0) {
 }
 
 TsHeader::~TsHeader() {
