@@ -42,7 +42,6 @@ public:
     std::map<int, pmtInfoT> mPmtMap;
 
     // PAT
-    SimpleBuffer mPatBuf;
     PATHeader mPatHeader;
     bool mPatIsValid = false;
 
@@ -50,4 +49,5 @@ private:
     // pid, Elementary data frame
     std::map<int, std::shared_ptr<EsFrame>> mEsFrames;
     SimpleBuffer mRestData;
+    SimpleBuffer mPatBuf;
 };
