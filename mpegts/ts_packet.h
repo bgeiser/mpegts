@@ -69,6 +69,8 @@ public:
 
     void decode(SimpleBuffer &rSb);
 
+    uint16_t getSectionLength(SimpleBuffer &rSb);
+
     void print();
 
     uint8_t mTableId;                       // 8 bits

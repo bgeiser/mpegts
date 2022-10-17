@@ -42,6 +42,7 @@ public:
     std::map<int, pmtInfoT> mPmtMap;
 
     // PAT
+    SimpleBuffer mPatBuf;
     PATHeader mPatHeader;
     bool mPatIsValid = false;
 

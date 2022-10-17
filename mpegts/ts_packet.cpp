@@ -94,6 +94,11 @@ void PATHeader::encode(SimpleBuffer &rSb) {
     rSb.write1Byte(mLastSectionNumber);
 }
 
+uint16_t PATHeader::getSectionLength(SimpleBuffer &rSb) {
+    uint8_t *data = rSb.data() + rSb.pos() + 1;
+    return ((uint16_t)(data[0] & 0xf) << 8) | (uint16_t)data[1];
+}
+
 void PATHeader::decode(SimpleBuffer &rSb) {
     mTableId = rSb.read1Byte();
 

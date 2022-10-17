@@ -26,26 +26,27 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                 lAdaptionField.decode(rIn);
                 rIn.skip(lAdaptionField.mAdaptationFieldLength > 0 ? (lAdaptionField.mAdaptationFieldLength - 1) : 0);
             }
-
             if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadOnly ||
                 lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
-                if (lTsHeader.mPayloadUnitStartIndicator == 0x01) {
+                if (lTsHeader.mPayloadUnitStartIndicator == 0x01)
                     uint8_t lPointField = rIn.read1Byte();
-                }
-
-                mPatHeader.decode(rIn);
-                auto start = rIn.pos();
-                while(rIn.pos() < start + mPatHeader.mSectionLength - 12) {
-                    auto progNo = rIn.read2Bytes();
-                    auto pmtPid = rIn.read2Bytes() & 0x1fff;
-                    mPmtMap[pmtPid] = { {}, false, -1, progNo, {} };
-                    // std::cout<<"Prog "<<progNo<<std::endl;
-                    // std::cout<<"PMT PID "<<pmtPid<<std::endl;
-                }
-                mPatIsValid = true;
+                mPatBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
+                if (mPatBuf.size() >= mPatHeader.getSectionLength(mPatBuf)) {
+                    mPatHeader.decode(mPatBuf);
+                    auto start = rIn.pos();
+                    while(mPatBuf.pos() < start + mPatHeader.mSectionLength - 12) {
+                        auto progNo = mPatBuf.read2Bytes();
+                        auto pmtPid = mPatBuf.read2Bytes() & 0x1fff;
+                        mPmtMap[pmtPid] = { {}, false, -1, progNo, {} };
+                        // std::cout<<"Prog "<<progNo<<std::endl;
+                        // std::cout<<"PMT PID "<<pmtPid<<std::endl;
+                    }
+                    mPatBuf.clear();
+                    mPatIsValid = true;
 #ifdef TSDEBUG
-                mPatHeader.print();
+                    mPatHeader.print();
 #endif
+                }
             }
         }
 
@@ -59,35 +60,32 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                     lAdaptionField.decode(rIn);
                     rIn.skip(lAdaptionField.mAdaptationFieldLength > 0 ? (lAdaptionField.mAdaptationFieldLength - 1) : 0);
                 }
-                bool sectionComplete = false;
-                if (lTsHeader.mPayloadUnitStartIndicator == 0x01) {
-                    uint8_t lPointField = rIn.read1Byte();
+                if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadOnly ||
+                    lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
+                    if (lTsHeader.mPayloadUnitStartIndicator == 0x01)
+                        uint8_t lPointField = rIn.read1Byte();
                     pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
-                } else if(pmtInfo.mPmtBuf.size()) {
-                    pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos());
-                    if(pmtInfo.mPmtBuf.size() >= pmtInfo.mPmtHeader.getSectionLength(pmtInfo.mPmtBuf))
-                        sectionComplete = true;
-                }
-                if (sectionComplete) {
-                    pmtInfo.mPmtHeader.decode(pmtInfo.mPmtBuf);
-                    pmtInfo.mPmtBuf.clear();
-                    pmtInfo.mPcrId = pmtInfo.mPmtHeader.mPcrPid;
-                    if(pmtInfo.mPmtHeader.mSectionNumber == pmtInfo.mCurrentSection)
-                        {
-                            for (size_t lI = 0; lI < pmtInfo.mPmtHeader.mInfos.size(); lI++) {
-                                auto &info = pmtInfo.mPmtHeader.mInfos[lI];
-                                if(mEsFrames.find(info->mElementaryPid) == mEsFrames.end()) {
-                                    mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType));
-                                    //                                mStreamPidMap[info->mStreamType] = info->mElementaryPid;
+                    if (pmtInfo.mPmtBuf.size() >= pmtInfo.mPmtHeader.getSectionLength(pmtInfo.mPmtBuf)) {
+                        pmtInfo.mPmtHeader.decode(pmtInfo.mPmtBuf);
+                        pmtInfo.mPmtBuf.clear();
+                        pmtInfo.mPcrId = pmtInfo.mPmtHeader.mPcrPid;
+                        if(pmtInfo.mPmtHeader.mSectionNumber == pmtInfo.mCurrentSection)
+                            {
+                                for (size_t lI = 0; lI < pmtInfo.mPmtHeader.mInfos.size(); lI++) {
+                                    auto &info = pmtInfo.mPmtHeader.mInfos[lI];
+                                    if(mEsFrames.find(info->mElementaryPid) == mEsFrames.end()) {
+                                        mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType));
+                                        //                                mStreamPidMap[info->mStreamType] = info->mElementaryPid;
+                                    }
                                 }
+                                pmtInfo.mCurrentSection++;
                             }
-                            pmtInfo.mCurrentSection++;
-                        }
-                    if(pmtInfo.mCurrentSection > pmtInfo.mPmtHeader.mLastSectionNumber)
-                        pmtInfo.mPmtIsValid = true;
+                        if(pmtInfo.mCurrentSection > pmtInfo.mPmtHeader.mLastSectionNumber)
+                            pmtInfo.mPmtIsValid = true;
 #ifdef TSDEBUG
-                    pmtInfo.mPmtHeader.print();
+                        pmtInfo.mPmtHeader.print();
 #endif
+                    }
                 }
             }
         }
