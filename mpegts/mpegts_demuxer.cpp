@@ -128,7 +128,17 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
             if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadOnly ||
                 lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
                 PESHeader lPesHeader;
-                if (lTsHeader.mPayloadUnitStartIndicator == 0x01) {
+                if(mEsFrames[lTsHeader.mPid]->mStreamType == 0x80)
+                    {
+                        mEsFrames[lTsHeader.mPid]->mCompleted = true;
+                        mEsFrames[lTsHeader.mPid]->mPid = lTsHeader.mPid;
+                        EsFrame *lEsFrame = mEsFrames[lTsHeader.mPid].get();
+                        if (esOutCallback) {
+                            esOutCallback(lEsFrame);
+                        }
+                        mEsFrames[lTsHeader.mPid]->reset();
+                    }
+                else if (lTsHeader.mPayloadUnitStartIndicator == 0x01) {
 
                     mEsFrames[lTsHeader.mPid]->mRandomAccess = lRandomAccessIndicator;
 
