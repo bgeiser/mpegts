@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <memory>
 #include <map>
+#include <set>
 #include <functional>
 #include <mutex>
 
@@ -33,6 +34,7 @@ public:
         int mProgNo;
         SimpleBuffer mPmtBuf;
         int mCurrentSection = 0;
+        std::set<int> epids;
     } pmtInfoT;
 
     // stream, pid

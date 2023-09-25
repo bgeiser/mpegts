@@ -17,7 +17,7 @@ class EsFrame {
 public:
     EsFrame();
 
-    EsFrame(uint8_t lSt);
+    EsFrame(uint8_t lSt, uint16_t pmtPid);
 
     virtual ~EsFrame() {};
 
@@ -37,6 +37,8 @@ public:
     uint16_t mExpectedPayloadLength;
     bool mCompleted;
     bool mBroken;
+
+    uint16_t mPmtPid;
 };
 
 class TsHeader {

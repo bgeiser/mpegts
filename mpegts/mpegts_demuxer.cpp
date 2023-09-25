@@ -43,7 +43,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                     while(mPatBuf.pos() < start + mPatHeader.mSectionLength - 8) {
                         auto progNo = mPatBuf.read2Bytes();
                         auto pmtPid = mPatBuf.read2Bytes() & 0x1fff;
-                        mPmtMap[pmtPid] = { {}, false, -1, progNo, {} };
+                        mPmtMap[pmtPid] = { {}, false, -1, progNo, {}, 0, {} };
                         // std::cout<<"Prog "<<progNo<<std::endl;
                         // std::cout<<"PMT PID "<<pmtPid<<std::endl;
                     }
@@ -85,8 +85,9 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                             {
                                 for (size_t lI = 0; lI < pmtInfo.mPmtHeader.mInfos.size(); lI++) {
                                     auto &info = pmtInfo.mPmtHeader.mInfos[lI];
+                                    pmtInfo.epids.insert(info->mElementaryPid);
                                     if(mEsFrames.find(info->mElementaryPid) == mEsFrames.end()) {
-                                        mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType));
+                                        mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType, lTsHeader.mPid));
                                         //                                mStreamPidMap[info->mStreamType] = info->mElementaryPid;
                                     }
                                 }
