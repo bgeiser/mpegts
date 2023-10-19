@@ -85,7 +85,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                             {
                                 for (size_t lI = 0; lI < pmtInfo.mPmtHeader.mInfos.size(); lI++) {
                                     auto &info = pmtInfo.mPmtHeader.mInfos[lI];
-                                    pmtInfo.epids.insert(info->mElementaryPid);
+                                    pmtInfo.epids[info->mElementaryPid] = info->mStreamType;
                                     if(mEsFrames.find(info->mElementaryPid) == mEsFrames.end()) {
                                         mEsFrames[info->mElementaryPid] = std::shared_ptr<EsFrame>(new EsFrame(info->mStreamType, lTsHeader.mPid));
                                         //                                mStreamPidMap[info->mStreamType] = info->mElementaryPid;

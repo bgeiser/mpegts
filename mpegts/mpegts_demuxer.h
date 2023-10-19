@@ -34,7 +34,7 @@ public:
         int mProgNo;
         SimpleBuffer mPmtBuf;
         int mCurrentSection = 0;
-        std::set<int> epids;
+        std::map<int,int> epids; // (elementaryPid, streamType)
     } pmtInfoT;
 
     // stream, pid
