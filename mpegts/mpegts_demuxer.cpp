@@ -37,7 +37,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                     }
                 else if(mPatBuf.size())
                     mPatBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos()); // TODO verify continuity
-                if (mPatBuf.size() && mPatBuf.size() >= mPatHeader.getSectionLength(mPatBuf)) {
+                if (mPatBuf.size() > 3 && mPatBuf.size() >= mPatHeader.getSectionLength(mPatBuf)) {
                     mPatHeader.decode(mPatBuf);
                     auto start = mPatBuf.pos();
                     while(mPatBuf.pos() < start + mPatHeader.mSectionLength - 8) {
@@ -77,7 +77,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                         }
                     else if(pmtInfo.mPmtBuf.size())
                         pmtInfo.mPmtBuf.append(rIn.data()+rIn.pos(), rIn.size() - rIn.pos()); // TODO verify continuity
-                    if (pmtInfo.mPmtBuf.size() && pmtInfo.mPmtBuf.size() >= pmtInfo.mPmtHeader.getSectionLength(pmtInfo.mPmtBuf)) {
+                    if (pmtInfo.mPmtBuf.size() > 3 && pmtInfo.mPmtBuf.size() >= pmtInfo.mPmtHeader.getSectionLength(pmtInfo.mPmtBuf)) {
                         pmtInfo.mPmtHeader.decode(pmtInfo.mPmtBuf);
                         pmtInfo.mPmtBuf.clear();
                         pmtInfo.mPcrId = pmtInfo.mPmtHeader.mPcrPid;
