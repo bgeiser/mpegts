@@ -40,7 +40,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
                 if (mPatBuf.size() > 3 && mPatBuf.size() >= mPatHeader.getSectionLength(mPatBuf)) {
                     mPatHeader.decode(mPatBuf);
                     auto start = mPatBuf.pos();
-                    while(mPatBuf.pos() < start + mPatHeader.mSectionLength - 8) {
+                    while(mPatBuf.pos() < start + mPatHeader.mSectionLength - 12) {
                         auto progNo = mPatBuf.read2Bytes();
                         auto pmtPid = mPatBuf.read2Bytes() & 0x1fff;
                         mPmtMap[pmtPid] = { {}, false, -1, progNo, {}, 0, {} };
