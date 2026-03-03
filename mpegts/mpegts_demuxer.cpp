@@ -19,7 +19,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
         lTsHeader.decode(rIn);
 
         // found pat & get pmt pid
-        if (!mPatIsValid && lTsHeader.mPid == 0) {
+        if ((!mFixedPatPmt || !mPatIsValid) && lTsHeader.mPid == 0) {
             if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mAdaptionOnly ||
                 lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
                 AdaptationFieldHeader lAdaptionField;
@@ -57,7 +57,7 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
         }
 
         // found pmt
-        if (mPmtMap.find(lTsHeader.mPid) != mPmtMap.end()) {
+        if (!mFixedPatPmt && mPmtMap.find(lTsHeader.mPid) != mPmtMap.end()) {
             auto &pmtInfo = mPmtMap.at(lTsHeader.mPid);
             if (!pmtInfo.mPmtIsValid) {
                 if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mAdaptionOnly ||
@@ -241,4 +241,11 @@ uint8_t MpegTsDemuxer::decode(SimpleBuffer &rIn) {
 
     rIn.clear();
     return 0;
+}
+
+
+void
+MpegTsDemuxer::fixatePatPmt()
+{
+    this->mFixedPatPmt = true;
 }

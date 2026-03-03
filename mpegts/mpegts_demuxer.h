@@ -23,7 +23,7 @@ public:
     virtual ~MpegTsDemuxer();
 
     uint8_t decode(SimpleBuffer &rIn);
-
+    void fixatePatPmt();
     std::function<void(EsFrame *pEs)> esOutCallback = nullptr;
     std::function<void(uint64_t lPcr)> pcrOutCallback = nullptr;
 
@@ -46,7 +46,7 @@ public:
     // PAT
     PATHeader mPatHeader;
     bool mPatIsValid = false;
-
+    bool mFixedPatPmt = false;
 private:
     // pid, Elementary data frame
     std::map<int, std::shared_ptr<EsFrame>> mEsFrames;
